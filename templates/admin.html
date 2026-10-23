@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Admin panel{% endblock %}
+{% block content %}
+<div class="dash">
+  <div class="card hero">
+    <div class="av"><svg class="ic"><use href="#i-crown"/></svg></div>
+    <div><h2>Admin panel</h2><p>Turnirni boshqaring: buyruq bering, tizim uni bajaradi.</p></div>
+    <a class="edbtn" href="{{ url_for('xabarlar') }}"><svg class="ic"><use href="#i-headset"/></svg>Support xabarlari{% if unread %}<i class="bdg">{{ unread }}</i>{% endif %}</a>
+  </div>
+  <div class="stats">
+    <div class="st"><span>Foydalanuvchilar</span><b>{{ stats.users }}</b></div>
+    <div class="st"><span>Jamoalar</span><b>{{ stats.teams }}/8</b></div>
+    <div class="st"><span>O'ynalgan o'yinlar</span><b>{{ stats.played }}/7</b></div>
+    <div class="st"><span>Kutilayotgan to'lovlar</span><b>{{ stats.pending }}</b></div>
+    <div class="st"><span>Tushum</span><b>{{ stats.revenue|pul }} so'm</b></div>
+  </div>
+
+  <div class="card ed" id="tolov"><h3>To'lovlar</h3>
+    {% macro qator(p, kutilmoqda) %}
+    <div class="py"><div class="pyi"><b>{{ p.taxallus or p.username or "(o'chirilgan)" }}</b>
+      <small>{{ p.jamoa or "—" }} · {{ PN[p.pos] }} · {{ p.amount|pul }} so'm · {{ (p.submitted_at or p.created_at)|vaqt }}</small>
+      {% if p.ref %}<small>Chek yoki izoh: {{ p.ref }}</small>{% endif %}</div>
+      <form class="pya" method="post" action="{{ url_for('admin_tolov') }}"{% if not kutilmoqda %} data-confirm="Joyni bo'shatishni tasdiqlaysizmi?"{% endif %}>
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ p.id }}">
+        {% if kutilmoqda %}
+          <input name="why" placeholder="Rad etish sababi (ixtiyoriy)" maxlength="150">
+          <button class="mb" name="act" value="ok">Tasdiqlash</button>
+          <button class="mb sec" name="act" value="no">Rad etish</button>
+        {% else %}
+          <span class="bd paid">Tasdiqlandi</span>
+          <button class="mb sec" name="act" value="rel">Joyni bo'shatish</button>
+        {% endif %}
+      </form></div>
+    {% endmacro %}
+    <div class="mh">Tasdiqlash kutilmoqda</div>
+    {% for p in pending %}{{ qator(p, true) }}{% else %}<p class="mut">Tasdiq kutayotgan to'lov yo'q.</p>{% endfor %}
+    {% if paid %}<div class="mh">Tasdiqlangan to'lovlar</div>{% for p in paid %}{{ qator(p, false) }}{% endfor %}{% endif %}
+  </div>
+
+  <div class="card ed"><h3>To'lov sozlamalari</h3>
+    <form method="post" action="{{ url_for('admin_sozlama') }}" id="acfgf">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="row2">
+        <label>Joy narxi (so'm)<input name="price" type="number" min="1000" max="10000000" step="1000" value="{{ cfg.price }}" required></label>
+        <label>Qabul qiluvchi rekviziti<input name="card" maxlength="120" value="{{ cfg.card }}" placeholder="Karta raqami va egasining ismi"></label>
+      </div>
+      <label>Foydalanuvchiga izoh<input name="note" maxlength="200" value="{{ cfg.note }}" placeholder="Masalan: izohga jamoa nomini yozing"></label>
+      <div class="acts"><button>Saqlash</button></div>
+    </form>
+  </div>
+
+  <div class="card ed" id="turnir"><h3>Turnir boshqaruvi</h3>
+    {% for m in rows %}
+    <div class="am"><div class="amh">{{ m.lab }}<span class="bd {{ m.s }}">{{ HOLAT_O[m.s] }}</span></div>
+      <div class="amt">{% if m.a %}<b style="color:{{ m.a.c }}">{{ m.a.n }}</b>{% else %}<em class="mut">kutilmoqda</em>{% endif %} <i>vs</i> {% if m.b %}<b style="color:{{ m.b.c }}">{{ m.b.n }}</b>{% else %}<em class="mut">kutilmoqda</em>{% endif %}</div>
+      <div class="amc">
+      {% if not m.a or not m.b %}<span class="mut">Ikkala jamoa aniqlanishi kerak</span>
+      {% elif m.s == 't' %}
+        <span>G'olib: <b style="color:{{ m.w.c }}">{{ m.w.n }}</b> ({{ m.sa }}:{{ m.sb }})</span>
+        <form class="inline" method="post" action="{{ url_for('admin_match') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cmd" value="reset"><input type="hidden" name="i" value="{{ m.i }}"><button class="mb sec">Natijani bekor qilish</button></form>
+      {% else %}
+        {% if m.s == 'k' %}<form class="inline" method="post" action="{{ url_for('admin_match') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cmd" value="start"><input type="hidden" name="i" value="{{ m.i }}"><button class="mb sec">O'yinni boshlash</button></form>{% endif %}
+        <form class="inline wf" method="post" action="{{ url_for('admin_match') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cmd" value="win"><input type="hidden" name="i" value="{{ m.i }}">
+          <select name="score"><option>2:0</option><option>2:1</option></select>
+          <button class="mb" name="side" value="0">{{ m.a.n }} g'olib</button><button class="mb" name="side" value="1">{{ m.b.n }} g'olib</button></form>
+        {% if m.s == 'j' %}<form class="inline" method="post" action="{{ url_for('admin_match') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cmd" value="reset"><input type="hidden" name="i" value="{{ m.i }}"><button class="mb sec">Bekor qilish</button></form>{% endif %}
+      {% endif %}
+      </div></div>
+    {% endfor %}
+    <form method="post" action="{{ url_for('admin_match') }}" data-confirm="Barcha natijalar tozalanadi. Davom etasizmi?"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cmd" value="clear"><button class="mb sec">Barcha natijalarni tozalash</button></form>
+  </div>
+
+  <div class="card ed"><h3>Buyruqlar jurnali</h3>
+    {% for x in log %}<div class="lg2"><time>{{ x.ts|vaqt }}</time><span>Buyruq: {{ x.cmd }}</span><b>Bajarildi: {{ x.res }}</b></div>
+    {% else %}<p class="mut">Hali buyruq berilmagan.</p>{% endfor %}
+  </div>
+
+  <div class="card ed" id="zahira"><h3>Zahira nusxalar</h3>
+    <p class="mut">Foydalanuvchilar, login va parollar (shifrlangan), jamoalar, to'lovlar va xabarlar saytdan alohida papkada saqlanadi va avtomatik nusxalanadi.</p>
+    <p class="mut">Ma'lumotlar papkasi: <b>{{ data_dir }}</b>{% if ikkinchi %} · ikkinchi zahira joyi yoqilgan{% else %} · ikkinchi zahira joyi sozlanmagan (README'ga qarang){% endif %}</p>
+    <div class="acts"><form class="inline" method="post" action="{{ url_for('zahira_qil_r') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Hozir zahira olish</button></form>
+      <a class="edbtn" href="{{ url_for('zahira_yuklab') }}"><svg class="ic"><use href="#i-arrow-l"/></svg>Yuklab olish (baza va rasmlar)</a></div>
+    {% for z in zahiralar %}<div class="lg2"><time>{{ z.vaqt|vaqt }}</time><span>{{ z.nom }}</span><b>{{ (z.hajm / 1024)|round|int }} KB</b></div>{% else %}<p class="mut">Hali zahira yo'q.</p>{% endfor %}
+  </div>
+
+  <div class="card ed" id="users"><h3>Foydalanuvchilar</h3>
+    <div class="scroll"><table>
+      <tr><th>ID</th><th>Foydalanuvchi</th><th>Elektron pochta</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr>
+      {% for u in users %}
+      <tr><td>{{ u.id }}</td><td>{{ u.username }}{% if u.is_admin %} <b class="tag">admin</b>{% endif %}</td><td>{{ u.email }}</td><td>{{ u.created_at[:10] }}</td>
+        <td>{{ "Bloklangan" if u.is_blocked else "Faol" }}</td>
+        <td>{% if not u.is_admin %}
+          <form method="post" action="{{ url_for('blok', uid=u.id) }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sm">{{ "Blokdan chiqarish" if u.is_blocked else "Bloklash" }}</button></form>
+          <form method="post" action="{{ url_for('ochirish', uid=u.id) }}" class="inline" data-confirm="Foydalanuvchi butunlay o'chiriladi. Davom etasizmi?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sm red">O'chirish</button></form>
+        {% endif %}</td></tr>
+      {% endfor %}
+    </table></div>
+  </div>
+</div>
+{% endblock %}

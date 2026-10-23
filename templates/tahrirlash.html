@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Profilni tahrirlash{% endblock %}
+{% block content %}
+<div class="dash">
+  <div class="card ehead"><h2>Profilni tahrirlash</h2><p>Rasmingiz va ma'lumotlaringizni yangilang</p></div>
+  <form method="post" enctype="multipart/form-data" id="ef">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="egrid">
+      <div class="card ava-card">
+        <div class="avbig" id="avbig">{% if user.avatar %}<img src="{{ url_for('rasm', nom=user.avatar) }}" alt="">{% else %}{{ (user.taxallus or user.username)[0]|upper }}{% endif %}</div>
+        <label class="upl">Rasm tanlash<input type="file" name="avatar" id="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+        <small>JPG, PNG yoki WEBP · 2 MB gacha</small>
+        {% if user.avatar %}<button type="submit" form="fo" class="ghost">Rasmni o'chirish</button>{% endif %}
+      </div>
+      <div class="card fields">
+        <label>Taxallus (ko'rinadigan ism)<input name="taxallus" maxlength="24" value="{{ user.taxallus }}" placeholder="Masalan: Shadow"></label>
+        <div class="row2">
+          <label>Daraja<select name="daraja"><option value="">Tanlang</option>{% for x in darajalar %}<option {{ "selected" if user.daraja == x }}>{{ x }}</option>{% endfor %}</select></label>
+          <label>Pozitsiya<select name="pozitsiya"><option value="">Tanlang</option>{% for x in pozitsiyalar %}<option {{ "selected" if user.pozitsiya == x }}>{{ x }}</option>{% endfor %}</select></label>
+        </div>
+        <label>Men haqimda<textarea name="haqida" id="haqida" maxlength="160" rows="4" placeholder="O'zingiz haqingizda qisqacha yozing...">{{ user.haqida }}</textarea><span class="cnt" id="cnt">0/160</span></label>
+        <div class="acts"><button>Saqlash</button><a class="btn2" href="{{ url_for('profil') }}">Bekor qilish</a></div>
+      </div>
+    </div>
+  </form>
+  <form id="fo" method="post" action="{{ url_for('rasm_ochirish') }}"><input type="hidden" name="csrf" value="{{ csrf }}"></form>
+</div>
+{% endblock %}

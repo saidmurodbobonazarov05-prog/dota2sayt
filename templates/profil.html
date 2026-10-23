@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Shaxsiy kabinet{% endblock %}
+{% block content %}
+<div class="dash">
+  <div class="card hero">
+    <div class="av">{% if user.avatar %}<img src="{{ url_for('rasm', nom=user.avatar) }}" alt="">{% else %}{{ (user.taxallus or user.username)[0]|upper }}{% endif %}</div>
+    <div><h2>Xush kelibsiz, {{ user.taxallus or user.username }}!</h2><p>{{ user.email }}</p>{% if user.haqida %}<p class="bio">{{ user.haqida }}</p>{% endif %}</div>
+    <a class="edbtn" href="{{ url_for('tahrirlash') }}"><svg class="ic"><use href="#i-edit"/></svg>Profilni tahrirlash</a>
+  </div>
+  <div class="stats">
+    <div class="st"><span>Daraja</span><b>{{ user.daraja or "Belgilanmagan" }}</b></div>
+    <div class="st"><span>Pozitsiya</span><b>{{ user.pozitsiya or "Belgilanmagan" }}</b></div>
+    <div class="st"><span>Jamoa</span><b>{{ jamoa.name if jamoa else "Jamoada emas" }}</b></div>
+    <div class="st"><span>A'zo bo'lgan sana</span><b>{{ user.created_at[:10] }}</b></div>
+  </div>
+  <div class="card ed" id="tolovlar"><h3>To'lovlarim</h3>
+    {% for p in tolovlar %}
+    <div class="py"><div class="pyi"><b>{{ p.jamoa or "—" }} · {{ LAVOZIM[p.pos] }}</b><small>{{ p.amount|pul }} so'm · {{ p.created_at|vaqt }}</small></div>
+      <span class="bd {{ p.status }}">{{ HOLAT[p.status] }}</span>
+      {% if p.status == 'hold' %}<a class="edbtn" href="{{ url_for('turnir') }}">Davom ettirish</a>{% endif %}</div>
+    {% else %}<p class="mut">Hali to'lov yo'q. Turnirga qo'shilib, bo'sh joyni band qiling.</p>{% endfor %}
+  </div>
+  <div class="quick">
+    <a href="{{ url_for('turnir') }}" class="q"><svg class="ic"><use href="#i-bracket"/></svg><span>Turnirga qo'shiling</span><small>Jamoa va joylar</small></a>
+    <a href="{{ url_for('xabarlar') }}" class="q"><svg class="ic"><use href="#i-mail"/></svg><span>Xabarlar</span><small>Shaxsiy va support{% if unread %}<i class="bdg">{{ unread }}</i>{% endif %}</small></a>
+    <a href="{{ url_for('tez_orada') }}" class="q"><svg class="ic"><use href="#i-shield"/></svg><span>Qahramonlar ro'yxati</span><small>Tez orada</small></a>
+    <a href="{{ url_for('tez_orada') }}" class="q"><svg class="ic"><use href="#i-flag"/></svg><span>Yangiliklar</span><small>Tez orada</small></a>
+  </div>
+</div>
+{% endblock %}

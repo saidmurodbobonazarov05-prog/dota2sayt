@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Dota 2 Ochiq Chempionati{% endblock %}
+{% block content %}
+<div id="tour" class="trn">
+  <div class="trh">
+    <h1 class="tt"><i></i>Dota 2 Ochiq Chempionati<i></i></h1>
+    <p>O'yinni tanlang, xaritani oching va jamoangizdagi o'z o'rningizni egallang.</p>
+    {% if not user.is_admin %}
+    <form id="nf" class="nf"><input name="tn" placeholder="Jamoangiz nomi" maxlength="22" autocomplete="off">
+      <span id="sw">{% for c in RANGLAR %}<label class="sw"><input type="radio" name="col" value="{{ c }}"{{ ' checked' if loop.first }} hidden><i style="background:{{ c }}"></i></label>{% endfor %}</span>
+      <button><svg class="ic"><use href="#i-shield"/></svg>Jamoa yaratish</button></form>
+    {% endif %}
+    <div class="mtb" id="tc"></div>
+    <div class="lg"><i class="g1"></i>Tugagan <i class="g2"></i>Jonli <i class="g3"></i>Kutilmoqda</div>
+  </div>
+  <div class="cosmos"><canvas id="cv"></canvas><div class="scr"><div class="stage" id="stg"></div></div></div>
+</div>
+{% endblock %}
+{% block after %}
+<div class="mp" id="mp"><button class="ghost x" id="mx"><svg class="ic"><use href="#i-close"/></svg>Yopish</button>
+  <div class="mph" id="mh"></div><p class="hint2" id="mhint"></p>
+  <div class="mpg"><svg id="msvg" viewBox="0 0 800 800"></svg><aside class="rt"><div id="mpl"></div><div class="chat" id="chat"></div></aside></div></div>
+<div class="am2" id="pay" style="display:none"><div class="card" id="payb"></div></div>
+<div class="ts" id="ts"></div>
+{% endblock %}
+{% block js %}<script src="{{ url_for('static', filename='js/turnir.js') }}"></script>{% endblock %}

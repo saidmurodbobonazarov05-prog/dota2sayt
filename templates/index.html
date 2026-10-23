@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% set nav = 'home' %}
+{% block content %}
+<h1>O'yinga xush kelibsiz: shaxsiy hisobingizga kiring yoki ro'yxatdan o'ting</h1>
+<div class="box">
+  <form method="post" action="{{ url_for('kirish') }}" id="fk"{% if request.args.get('r') %} hidden{% endif %}>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h2>Kirish</h2><small>(Login)</small>
+    <input name="username" placeholder="Foydalanuvchi nomi" autocomplete="username" required>
+    <input name="password" type="password" placeholder="Parol" autocomplete="current-password" required>
+    <button>Kirish</button>
+    <div class="links">Parolni unutdingizmi? Support xizmatiga yozing.<br>Yangi foydalanuvchi? <a href="#" id="toR">Ro'yxatdan o'ting</a></div>
+  </form>
+  <form method="post" action="{{ url_for('royxat') }}" id="fr"{% if not request.args.get('r') %} hidden{% endif %}>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h2>Ro'yxatdan o'tish</h2><small>(Registratsiya)</small>
+    <input name="username" placeholder="Foydalanuvchi nomi" autocomplete="username" required maxlength="20">
+    <input name="email" type="email" placeholder="Elektron pochta" autocomplete="email" required maxlength="120">
+    <input name="password" type="password" placeholder="Parol" autocomplete="new-password" required>
+    <div class="hint">Kamida 6 ta belgi kerak.</div>
+    <input name="password2" type="password" placeholder="Parolni tasdiqlang" autocomplete="new-password" required>
+    <button>Ro'yxatdan o'tish</button>
+    <div class="links">Hisobingiz bormi? <a href="#" id="toK">Kirish</a></div>
+  </form>
+</div>
+{% endblock %}

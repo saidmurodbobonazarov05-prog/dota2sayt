@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Dota 2 Nashri{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-csrf="{{ csrf }}"{% if user %} data-uid="{{ user.id }}" data-adm="{{ 1 if user.is_admin else 0 }}" data-name="{{ user.taxallus or user.username }}"{% endif %}>
+{% include "sprite.html" %}
+<header>
+  <a class="logo" href="{{ url_for('bosh') }}"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="Dota 2 Nashri"></a>
+  <nav>
+    <a href="{{ url_for('bosh') }}" class="{{ 'on' if nav == 'home' }}">Bosh sahifa</a>
+    {% if user %}<a href="{{ url_for('turnir') }}" class="{{ 'on' if nav == 'tour' }}">Turnirga qo'shiling</a>{% endif %}
+    <a href="{{ url_for('tez_orada') }}">Qahramonlar ro'yxati</a>
+    <a href="{{ url_for('tez_orada') }}">Haqimizda</a>
+    <a href="{{ url_for('tez_orada') }}" class="lang">Til: O'zbekcha</a>
+    {% if user %}
+      {% if user.is_admin %}<a href="{{ url_for('admin') }}" class="{{ 'on' if nav == 'adm' }}">Admin panel</a>{% endif %}
+      <a href="{{ url_for('xabarlar') }}" id="nm" class="{{ 'on' if nav == 'msg' }}"><svg class="ic"><use href="#i-mail"/></svg>Xabarlar<i class="bdg" id="mb"{% if not unread %} style="display:none"{% endif %}>{{ unread or '' }}</i></a>
+      <form method="post" action="{{ url_for('chiqish') }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="link"><svg class="ic"><use href="#i-logout"/></svg>Chiqish</button></form>
+    {% endif %}
+  </nav>
+</header>
+<main>
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in msgs %}<div class="msg {{ cat }}">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<div class="embers">{% for i in range(26) %}<i style="left:{{ (i*37+11)%100 }}%;animation-delay:-{{ (i*13)%9 }}s;animation-duration:{{ 6+(i*7)%6 }}s"></i>{% endfor %}</div>
+<footer>
+  <div class="soc">
+    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8V6.5c0-.7.3-1 1-1h2V2h-3c-3 0-4.5 1.8-4.5 4.5V8H7v3.5h2.5V22H14V11.5h2.8L17.5 8z"/></svg></a>
+    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 8.2c-.2-1.4-1-2.2-2.4-2.4C17.8 5.5 12 5.5 12 5.5s-5.8 0-7.6.3C3 6 2.2 6.8 2 8.2 1.8 9.5 1.8 12 1.8 12s0 2.5.2 3.8c.2 1.4 1 2.2 2.4 2.4 1.8.3 7.6.3 7.6.3s5.8 0 7.6-.3c1.4-.2 2.2-1 2.4-2.4.2-1.3.2-3.8.2-3.8s0-2.5-.2-3.8zM10 15V9l5 3z"/></svg></a>
+  </div>
+  Valve Korporatsiyasiga bog'liq emas. Dota 2 tasvirlari Valve mulkidir va barcha huquqlar himoyalangan.
+</footer>
+{% block after %}{% endblock %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% block js %}{% endblock %}
+</body>
+</html>

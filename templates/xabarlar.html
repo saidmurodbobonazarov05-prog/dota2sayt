@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Xabarlar{% endblock %}
+{% block content %}
+<div class="inb">
+  <div class="card ehead"><h2>Xabarlar</h2><p>{% if user.is_admin %}Foydalanuvchilarning support so'rovlari{% else %}Shaxsiy suhbatlar va support xizmati{% endif %}</p></div>
+  <div class="mgrid">
+    <aside class="card mside">
+      {% if not user.is_admin %}<div class="msrch"><svg class="ic"><use href="#i-search"/></svg><input id="mq" placeholder="Foydalanuvchini qidirish" autocomplete="off" maxlength="20"></div>{% endif %}
+      <div id="mlist"></div>
+    </aside>
+    <section class="card mmain"><div class="mhd" id="mhd2"></div><div class="cl" id="mth"></div>
+      <form class="cf" id="mf" hidden><input name="t" maxlength="500" placeholder="Xabar yozing..." autocomplete="off"><button aria-label="Yuborish"><svg class="ic"><use href="#i-send"/></svg></button></form></section>
+  </div>
+</div>
+{% endblock %}
+{% block js %}<script src="{{ url_for('static', filename='js/xabarlar.js') }}"></script>{% endblock %}
